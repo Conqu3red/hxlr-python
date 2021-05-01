@@ -15,8 +15,15 @@ class LineType:
     ACCEL = 1
     SCENERY = 2
 
+line_colors = [
+    (0, 0, 0),
+    (255, 0, 0),
+    (0, 255, 0),
+]
+
 pygame.init()
 pygame.display.init()
+pygame.display.set_caption("HXLR Python")
 
 grid = hxlr_engine_Grid()
 riders = []
@@ -101,10 +108,11 @@ class Simulation:
         self.riders = riders
         self.renderer = Renderer(self.screen, self.SIZE)
         self.frame = 0
+        self.playing = False
     
     def renderLines(self):
         for line in self.grid.lines:
-            self.renderer.drawLine(line.start, line.end, 1, (0, 0, 0))
+            self.renderer.drawLine(line.start, line.end, 1, line_colors[line.type])
     
     def renderRiders(self):
         for rider in self.riders:
@@ -158,12 +166,16 @@ class Simulation:
                 self.renderer.pos.y = self.renderer.pos.y + (self.mouse_y - self.old_mouse_y) / self.renderer.zoom
                 self.old_mouse_x, self.old_mouse_y = self.mouse_x, self.mouse_y
 
+        if event.type == pygame.VIDEORESIZE:
+            surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_x:
                 self.reset()
+            if event.key == pygame.K_p:
+                self.playing = not self.playing
 
         keys = pygame.key.get_pressed()
-        if keys[K_RIGHT]:
+        if keys[K_RIGHT] or self.playing:
             self.stepSim()
 
         self.screen.fill((255, 255, 255))
